@@ -32,10 +32,10 @@ public class Cylinder {
 			float y2 = (float) Math.cos(nextAngle) * radius;
 
 			// Define points for the sides of the cylinder using triangles
-			Point4f a = new Point4f(x1, y1, -height / 2, 0.0f);
-			Point4f b = new Point4f(x2, y2, height / 2, 0.0f);
-			Point4f c = new Point4f(x1, y1, height / 2, 0.0f);
-			Point4f d = new Point4f(x2, y2, -height / 2, 0.0f);
+			Point4f a = new Point4f(x1, y1, 0, 0.0f);
+			Point4f b = new Point4f(x2, y2, height , 0.0f);
+			Point4f c = new Point4f(x1, y1, height, 0.0f);
+			Point4f d = new Point4f(x2, y2, 0, 0.0f);
 
 			// Draw the side of cylinder using triangle
 			Vector4f normal1 = normal(a, b, c);
@@ -51,14 +51,14 @@ public class Cylinder {
 			GL11.glVertex3f(b.x, b.y, b.z);
 
 			// Draw the top and the bottom circle
-			Point4f e =  new Point4f(0.0f, 0.0f, -height/2, 0.0f);
+			Point4f e =  new Point4f(0.0f, 0.0f, 0, 0.0f);
 			Vector4f normal3 = normal(a, d, e);
 			GL11.glNormal3f(normal3.x, normal3.y, normal3.z);
 			GL11.glVertex3f(a.x, a.y, a.z);
 			GL11.glVertex3f(d.x, d.y, d.z);
 			GL11.glVertex3f(e.x, e.y, e.z);
 
-			Point4f f =  new Point4f(0.0f, 0.0f, height/2, 0.0f);
+			Point4f f =  new Point4f(0.0f, 0.0f, height, 0.0f);
 			Vector4f normal4 = normal(a, d, f);
 			GL11.glNormal3f(normal4.x, normal4.y, normal4.z);
 			GL11.glVertex3f(b.x, b.y, b.z);

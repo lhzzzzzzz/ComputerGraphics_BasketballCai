@@ -34,7 +34,6 @@ public class Human {
 
 	}
 
-	// Implement using notes in Animation lecture
 	public void drawHuman(float delta, boolean GoodAnimation) {
 		float theta = (float) (delta * 2 * Math.PI);
 		float LimbRotation;
@@ -48,7 +47,6 @@ public class Human {
 		Cylinder cylinder = new Cylinder();
 
 		glPushMatrix();
-
 		{
 			glTranslatef(0.0f, 0.5f, 0.0f);
 			sphere.drawSphere(0.5f, 32, 32);
@@ -68,7 +66,6 @@ public class Human {
 				{
 					glTranslatef(0.0f, 0.0f, 0.0f);
 					glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
-					// glRotatef(45.0f,0.0f,1.0f,0.0f);
 					cylinder.drawCylinder(0.15f, 0.7f, 32);
 
 					// head
@@ -78,58 +75,53 @@ public class Human {
 					{
 						glTranslatef(0.0f, 0.0f, 1.0f);
 						sphere.drawSphere(0.5f, 32, 32);
-						glPopMatrix();
 					}
 					glPopMatrix();
+				}
+				glPopMatrix();
 
-					// left shoulder
-					glColor3f(blue[0], blue[1], blue[2]);
-					glMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, Utils.ConvertForGL(blue));
+				// left shoulder
+				glColor3f(blue[0], blue[1], blue[2]);
+				glMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, Utils.ConvertForGL(blue));
+				glPushMatrix();
+				{
+					glTranslatef(0.5f, 0.4f, 0.0f);
+					sphere.drawSphere(0.25f, 32, 32);
+
+					// left arm
+					glColor3f(orange[0], orange[1], orange[2]);
+					glMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, Utils.ConvertForGL(orange));
 					glPushMatrix();
 					{
-						glTranslatef(0.5f, 0.4f, 0.0f);
-						sphere.drawSphere(0.25f, 32, 32);
+						glTranslatef(0.0f, 0.0f, 0.0f);
+						glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
+						glRotatef(LimbRotation, 1.0f, 0.0f, 0.0f);
+						cylinder.drawCylinder(0.15f, 0.7f, 32);
 
-						// left arm
-						glColor3f(orange[0], orange[1], orange[2]);
-						glMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, Utils.ConvertForGL(orange));
+						// left elbow
+						glColor3f(blue[0], blue[1], blue[2]);
+						glMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, Utils.ConvertForGL(blue));
 						glPushMatrix();
 						{
-							glTranslatef(0.0f, 0.0f, 0.0f);
-							glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
+							glTranslatef(0.0f, 0.0f, 0.75f);
+							sphere.drawSphere(0.2f, 32, 32);
 
-							glRotatef(LimbRotation, 1.0f, 0.0f, 0.0f);
-							// glRotatef(27.5f,0.0f,1.0f,0.0f);
-							cylinder.drawCylinder(0.15f, 0.7f, 32);
-
-							// left elbow
-							glColor3f(blue[0], blue[1], blue[2]);
-							glMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, Utils.ConvertForGL(blue));
+							// left forearm
+							glColor3f(orange[0], orange[1], orange[2]);
+							glMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, Utils.ConvertForGL(orange));
 							glPushMatrix();
 							{
-								glTranslatef(0.0f, 0.0f, 0.75f);
-								sphere.drawSphere(0.2f, 32, 32);
+								glTranslatef(0.0f, 0.0f, 0.0f);
+								glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
+								cylinder.drawCylinder(0.1f, 0.7f, 32);
 
-								// left forearm
-								glColor3f(orange[0], orange[1], orange[2]);
-								glMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, Utils.ConvertForGL(orange));
+								// left hand
+								glColor3f(blue[0], blue[1], blue[2]);
+								glMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, Utils.ConvertForGL(blue));
 								glPushMatrix();
 								{
-									glTranslatef(0.0f, 0.0f, 0.0f);
-									glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
-									// glRotatef(90.0f,0.0f,1.0f,0.0f);
-									cylinder.drawCylinder(0.1f, 0.7f, 32);
-
-									// left hand
-									glColor3f(blue[0], blue[1], blue[2]);
-									glMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, Utils.ConvertForGL(blue));
-									glPushMatrix();
-									{
-										glTranslatef(0.0f, 0.0f, 0.75f);
-										sphere.drawSphere(0.2f, 32, 32);
-
-									}
-									glPopMatrix();
+									glTranslatef(0.0f, 0.0f, 0.75f);
+									sphere.drawSphere(0.2f, 32, 32);
 								}
 								glPopMatrix();
 							}
@@ -138,29 +130,75 @@ public class Human {
 						glPopMatrix();
 					}
 					glPopMatrix();
-					// right shoulder
+				}
+				glPopMatrix();
+				// right shoulder
+				glColor3f(blue[0], blue[1], blue[2]);
+				glMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, Utils.ConvertForGL(blue));
+				glPushMatrix();
+				{
+					glTranslatef(-0.5f, 0.4f, 0.0f);
+					sphere.drawSphere(0.25f, 32, 32);
 
-						// right arm
+					// right arm
+					glColor3f(orange[0], orange[1], orange[2]);
+					glMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, Utils.ConvertForGL(orange));
+					glPushMatrix();
+					{
+						glTranslatef(0.0f, 0.0f, 0.0f);
+						glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
+						glRotatef(-LimbRotation, 1.0f, 0.0f, 0.0f);
+						cylinder.drawCylinder(0.15f, 0.7f, 32);
 
 						// right elbow
+						glColor3f(blue[0], blue[1], blue[2]);
+						glMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, Utils.ConvertForGL(blue));
+						glPushMatrix();
+						{
+							glTranslatef(0.0f, 0.0f, 0.75f);
+							sphere.drawSphere(0.2f, 32, 32);
 
-						// right forearm
-						// right hand
+							// right forearm
+							glColor3f(orange[0], orange[1], orange[2]);
+							glMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, Utils.ConvertForGL(orange));
+							glPushMatrix();
+							{
+								glTranslatef(0.0f, 0.0f, 0.0f);
+								glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
+								cylinder.drawCylinder(0.1f, 0.7f, 32);
 
-						// chest
-
+								// right hand
+								glColor3f(blue[0], blue[1], blue[2]);
+								glMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, Utils.ConvertForGL(blue));
+								glPushMatrix();
+								{
+									glTranslatef(0.0f, 0.0f, 0.75f);
+									sphere.drawSphere(0.2f, 32, 32);
+								}
+								glPopMatrix();
+							}
+							glPopMatrix();
+						}
+						glPopMatrix();
 					}
 					glPopMatrix();
+				}
+				glPopMatrix();
 
-					// pelvis
+				// pelvis
+				glColor3f(orange[0], orange[1], orange[2]);
+				glMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, Utils.ConvertForGL(orange));
+				glPushMatrix();
+				{
+					glTranslatef(0.0f, -0.5f, 0.0f);
+					sphere.drawSphere(0.5f, 32, 32);
 
 					// left hip
 					glColor3f(blue[0], blue[1], blue[2]);
 					glMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, Utils.ConvertForGL(blue));
 					glPushMatrix();
 					{
-						glTranslatef(-0.5f, -0.2f, 0.0f);
-
+						glTranslatef(0.5f, 0.2f, 0.0f);
 						sphere.drawSphere(0.25f, 32, 32);
 
 						// left high leg
@@ -170,9 +208,7 @@ public class Human {
 						{
 							glTranslatef(0.0f, 0.0f, 0.0f);
 							glRotatef(0.0f, 0.0f, 0.0f, 0.0f);
-
 							glRotatef((-LimbRotation / 2) + 90, 1.0f, 0.0f, 0.0f);
-							// glRotatef(90.0f,1.0f,0.0f,0.0f);
 							cylinder.drawCylinder(0.15f, 0.7f, 32);
 
 							// left knee
@@ -190,8 +226,6 @@ public class Human {
 								glPushMatrix();
 								{
 									glTranslatef(0.0f, 0.0f, 0.0f);
-									// glRotatef(120.0f,1.0f,0.0f,0.0f);
-									// glRotatef(0.0f,0.0f,0.0f,0.0f);
 									cylinder.drawCylinder(0.15f, 0.7f, 32);
 
 									// left foot
@@ -201,7 +235,6 @@ public class Human {
 									{
 										glTranslatef(0.0f, 0.0f, 0.75f);
 										sphere.drawSphere(0.3f, 32, 32);
-
 									}
 									glPopMatrix();
 								}
@@ -213,18 +246,68 @@ public class Human {
 					}
 					glPopMatrix();
 
-					// pelvis
-
 					// right hip
+					glColor3f(blue[0], blue[1], blue[2]);
+					glMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, Utils.ConvertForGL(blue));
+					glPushMatrix();
+					{
+						glTranslatef(-0.5f, 0.2f, 0.0f);
+						sphere.drawSphere(0.25f, 32, 32);
 
+						// right high leg
+						glColor3f(orange[0], orange[1], orange[2]);
+						glMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, Utils.ConvertForGL(orange));
+						glPushMatrix();
+						{
+							glTranslatef(0.0f, 0.0f, 0.0f);
+							glRotatef(0.0f, 0.0f, 0.0f, 0.0f);
+							glRotatef((LimbRotation / 2) + 90, 1.0f, 0.0f, 0.0f);
+							cylinder.drawCylinder(0.15f, 0.7f, 32);
+
+							// right knee
+							glColor3f(blue[0], blue[1], blue[2]);
+							glMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, Utils.ConvertForGL(blue));
+							glPushMatrix();
+							{
+								glTranslatef(0.0f, 0.0f, 0.75f);
+								glRotatef(0.0f, 0.0f, 0.0f, 0.0f);
+								sphere.drawSphere(0.25f, 32, 32);
+
+								// right low leg
+								glColor3f(orange[0], orange[1], orange[2]);
+								glMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, Utils.ConvertForGL(orange));
+								glPushMatrix();
+								{
+									glTranslatef(0.0f, 0.0f, 0.0f);
+									cylinder.drawCylinder(0.15f, 0.7f, 32);
+
+									// right foot
+									glColor3f(blue[0], blue[1], blue[2]);
+									glMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, Utils.ConvertForGL(blue));
+									glPushMatrix();
+									{
+										glTranslatef(0.0f, 0.0f, 0.75f);
+										sphere.drawSphere(0.3f, 32, 32);
+									}
+									glPopMatrix();
+								}
+								glPopMatrix();
+							}
+							glPopMatrix();
+						}
+						glPopMatrix();
+					}
+					glPopMatrix();
 				}
 				glPopMatrix();
-
 			}
-
+			glPopMatrix();
 		}
-
+		glPopMatrix();
 	}
+
+
+}
 
 /*
  * 
