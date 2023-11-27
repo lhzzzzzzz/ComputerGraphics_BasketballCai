@@ -1,6 +1,5 @@
 package objects3D;
 
-import org.newdawn.slick.opengl.Texture;
 import static org.lwjgl.opengl.GL11.*;
 import GraphicsObjects.Point4f;
 import GraphicsObjects.Vector4f;
@@ -39,16 +38,7 @@ public class Cube {
 
 			glVertex3f(vertices[faces[face][3]].x, vertices[faces[face][3]].y, vertices[faces[face][3]].z);
 		} // per face
-
 		glEnd();
-
 	}
-
 }
 
-/*
- * 
- * 
- * }
- * 
- */

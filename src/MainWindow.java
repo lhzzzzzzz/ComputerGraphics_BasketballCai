@@ -2,15 +2,18 @@
 import java.io.IOException;
 import java.nio.FloatBuffer;
 
+import Model.CaiXukun;
+import Model.Cart;
+import Model.Cheerleader;
+import Model.Hoop;
+import objects3D.*;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.LWJGLException;
 import org.lwjgl.Sys;
 import org.lwjgl.input.Keyboard;
-import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.util.glu.GLU.*;
 
 import org.newdawn.slick.Color;
 import org.newdawn.slick.opengl.Texture;
@@ -19,21 +22,13 @@ import org.newdawn.slick.util.ResourceLoader;
 
 import GraphicsObjects.Arcball;
 import GraphicsObjects.Utils;
-import objects3D.TexSphere;
-import objects3D.Grid;
-import objects3D.Human;
 
-//Main windows class controls and creates the 3D virtual world , please do not change this class but edit the other classes to complete the assignment. 
-// Main window is built upon the standard Helloworld LWJGL class which I have heavily modified to use as your standard openGL environment. 
-// 
-
-// Do not touch this class, I will be making a version of it for your 3rd Assignment 
 public class MainWindow {
-
-	private boolean MouseOnepressed = true;
 	private boolean dragMode = false;
 	private boolean BadAnimation = true;
-	private boolean Earth = false;
+	private boolean isKeyAPress = false;
+	private boolean isKeyRPress = false;
+	private boolean isKeyEPress = false;
 	/** position of pointer */
 	float x = 400, y = 300;
 	/** angle of rotation */
@@ -44,57 +39,38 @@ public class MainWindow {
 	int fps;
 	/** last fps time */
 	long lastFPS;
-
 	long myDelta = 0; // to use for animation
 	float Alpha = 0; // to use for animation
-	long StartTime; // beginAnimiation
+	long StartTime;
 
 	Arcball MyArcball = new Arcball();
 
 	boolean DRAWGRID = false;
 	boolean waitForKeyrelease = true;
-	/** Mouse movement */
-	int LastMouseX = -1;
-	int LastMouseY = -1;
+
+	// action of model
+	boolean standCXK = true;
+	boolean moveCXK = false;
+	boolean patCXK = false;
+	boolean shootCXK = false;
+	int stap = 0;
 
 	float pullX = 0.0f; // arc ball X cord.
 	float pullY = 0.0f; // arc ball Y cord.
 
-	int OrthoNumber = 1200; // using this for screen size, making a window of 1200 x 800 so aspect ratio 3:2
-							// // do not change this for assignment 3 but you can change everything for your
-							// project
+	int OrthoNumber = 1200;
+	Texture grass;
+	Texture sky;
+	Texture schoolBackground;
+	Texture basketBall;
 
-	// basic colours
-	static float black[] = { 0.0f, 0.0f, 0.0f, 1.0f };
-	static float white[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-
-	static float grey[] = { 0.5f, 0.5f, 0.5f, 1.0f };
+	static float grey[] = { 0.5f, 0.5f, 0.5f, 0.9f };
 	static float spot[] = { 0.1f, 0.1f, 0.1f, 0.5f };
-
-	// primary colours
-	static float red[] = { 1.0f, 0.0f, 0.0f, 1.0f };
-	static float green[] = { 0.0f, 1.0f, 0.0f, 1.0f };
-	static float blue[] = { 0.0f, 0.0f, 1.0f, 1.0f };
-
-	// secondary colours
-	static float yellow[] = { 1.0f, 1.0f, 0.0f, 1.0f };
-	static float magenta[] = { 1.0f, 0.0f, 1.0f, 1.0f };
-	static float cyan[] = { 0.0f, 1.0f, 1.0f, 1.0f };
-
-	// other colours
-	static float orange[] = { 1.0f, 0.5f, 0.0f, 1.0f, 1.0f };
-	static float brown[] = { 0.5f, 0.25f, 0.0f, 1.0f, 1.0f };
-	static float dkgreen[] = { 0.0f, 0.5f, 0.0f, 1.0f, 1.0f };
-	static float pink[] = { 1.0f, 0.6f, 0.6f, 1.0f, 1.0f };
-
-	// static GLfloat light_position[] = {0.0, 100.0, 100.0, 0.0};
-
-	// support method to aid in converting a java float array into a Floatbuffer
-	// which is faster for the opengl layer to process
 
 	public void start() {
 
 		StartTime = getTime();
+		System.out.println();
 		try {
 			Display.setDisplayMode(new DisplayMode(1200, 800));
 			Display.create();
@@ -108,8 +84,8 @@ public class MainWindow {
 		lastFPS = getTime(); // call before loop to initialise fps timer
 
 		while (!Display.isCloseRequested()) {
-			int delta = getDelta();
-			update(delta);
+//			int delta = getDelta();
+//			update(delta);
 			renderGL();
 			Display.update();
 			Display.sync(120); // cap fps to 120fps
@@ -119,69 +95,40 @@ public class MainWindow {
 	}
 
 	public void update(int delta) {
-		// rotate quad
-		// rotation += 0.01f * delta;
-
-		int MouseX = Mouse.getX();
-		int MouseY = Mouse.getY();
-		int WheelPostion = Mouse.getDWheel();
-
-		boolean MouseButonPressed = Mouse.isButtonDown(0);
-
-		if (MouseButonPressed && !MouseOnepressed) {
-			MouseOnepressed = true;
-			// System.out.println("Mouse drag mode");
-			MyArcball.startBall(MouseX, MouseY, 1200, 800);
-			dragMode = true;
-
-		} else if (!MouseButonPressed) {
-			// System.out.println("Mouse drag mode end ");
-			MouseOnepressed = false;
-			dragMode = false;
-		}
-
-		if (dragMode) {
-			MyArcball.updateBall(MouseX, MouseY, 1200, 800);
-		}
-
-		if (WheelPostion > 0) {
-			OrthoNumber += 10;
-
-		}
-
-		if (WheelPostion < 0) {
-			OrthoNumber -= 10;
-			if (OrthoNumber < 610) {
-				OrthoNumber = 610;
-			}
-
-			// System.out.println("Orth nubmer = " + OrthoNumber);
-
-		}
 
 		/** rest key is R */
-		if (Keyboard.isKeyDown(Keyboard.KEY_R))
-			MyArcball.reset();
+		if (Keyboard.isKeyDown(Keyboard.KEY_R)) {
+			if (!isKeyRPress) {
+				MyArcball.reset();
+				isKeyRPress = true;
+			}
+		} else {
+			isKeyRPress = false;
+		}
+
 
 		/* bad animation can be turn on or off using A key) */
+		if (Keyboard.isKeyDown(Keyboard.KEY_A)) {
+			if (!isKeyAPress) {
+				BadAnimation = !BadAnimation;
+				isKeyAPress = true;
+			}
+		} else {
+			isKeyAPress = false;
+		}
 
-		if (Keyboard.isKeyDown(Keyboard.KEY_A))
-			BadAnimation = !BadAnimation;
 		if (Keyboard.isKeyDown(Keyboard.KEY_D))
 			x += 0.35f * delta;
-
 		if (Keyboard.isKeyDown(Keyboard.KEY_W))
 			y += 0.35f * delta;
 		if (Keyboard.isKeyDown(Keyboard.KEY_S))
 			y -= 0.35f * delta;
-
 		if (Keyboard.isKeyDown(Keyboard.KEY_Q))
 			rotation += 0.35f * delta;
-		if (Keyboard.isKeyDown(Keyboard.KEY_E)) {
-			Earth = !Earth;
-		}
+
 		
-		if (waitForKeyrelease) // check done to see if key is released
+		// show grid
+		if (waitForKeyrelease)
 		{
 			if (Keyboard.isKeyDown(Keyboard.KEY_G)) {
 
@@ -196,12 +143,10 @@ public class MainWindow {
 			}
 		}
 
-		/** to check if key is released */
 		if (Keyboard.isKeyDown(Keyboard.KEY_G) == false) {
 			waitForKeyrelease = true;
 		} else {
 			waitForKeyrelease = false;
-
 		}
 
 		// keep quad on the screen
@@ -214,37 +159,21 @@ public class MainWindow {
 		if (y > 800)
 			y = 800;
 
-		updateFPS(); // update FPS Counter
-
-		LastMouseX = MouseX;
-		LastMouseY = MouseY;
+		updateFPS();
 	}
 
-	/**
-	 * Calculate how many milliseconds have passed since last frame.
-	 * 
-	 * @return milliseconds passed since last frame
-	 */
+
 	public int getDelta() {
 		long time = getTime();
 		int delta = (int) (time - lastFrame);
 		lastFrame = time;
-
 		return delta;
 	}
 
-	/**
-	 * Get the accurate system time
-	 * 
-	 * @return The system time in milliseconds
-	 */
 	public long getTime() {
 		return (Sys.getTime() * 1000) / Sys.getTimerResolution();
 	}
 
-	/**
-	 * Calculate the FPS and set it in the title bar
-	 */
 	public void updateFPS() {
 		if (getTime() - lastFPS > 1000) {
 			Display.setTitle("FPS: " + fps);
@@ -272,40 +201,25 @@ public class MainWindow {
 		FloatBuffer lightPos4 = BufferUtils.createFloatBuffer(4);
 		lightPos4.put(1000f).put(1000f).put(1000f).put(0).flip();
 
-		glLight(GL_LIGHT0, GL_POSITION, lightPos); // specify the
-													// position
-													// of the
-													// light
-		// glEnable(GL_LIGHT0); // switch light #0 on // I've setup specific materials
-		// so in real light it will look abit strange
+		glLight(GL_LIGHT0, GL_POSITION, lightPos);
+		 glEnable(GL_LIGHT0);
 
-		glLight(GL_LIGHT1, GL_POSITION, lightPos); // specify the
-													// position
-													// of the
-													// light
-		glEnable(GL_LIGHT1); // switch light #0 on
+		glLight(GL_LIGHT1, GL_POSITION, lightPos);
+		glEnable(GL_LIGHT1);
 		glLight(GL_LIGHT1, GL_DIFFUSE, Utils.ConvertForGL(spot));
 
-		glLight(GL_LIGHT2, GL_POSITION, lightPos3); // specify
-													// the
-													// position
-													// of the
-													// light
-		glEnable(GL_LIGHT2); // switch light #0 on
+		glLight(GL_LIGHT2, GL_POSITION, lightPos3);
+		glEnable(GL_LIGHT2);
 		glLight(GL_LIGHT2, GL_DIFFUSE, Utils.ConvertForGL(grey));
 
-		glLight(GL_LIGHT3, GL_POSITION, lightPos4); // specify
-													// the
-													// position
-													// of the
-													// light
-		glEnable(GL_LIGHT3); // switch light #0 on
+		glLight(GL_LIGHT3, GL_POSITION, lightPos4);
+		glEnable(GL_LIGHT3);
 		glLight(GL_LIGHT3, GL_DIFFUSE, Utils.ConvertForGL(grey));
 
-		glEnable(GL_LIGHTING); // switch lighting on
-		glEnable(GL_DEPTH_TEST); // make sure depth buffer is switched
-									// on
-		glEnable(GL_NORMALIZE); // normalize normal vectors for safety
+		glEnable(GL_LIGHTING);
+		glEnable(GL_DEPTH_TEST);
+
+		glEnable(GL_NORMALIZE);
 		glEnable(GL_COLOR_MATERIAL);
 
 		glEnable(GL_BLEND);
@@ -315,7 +229,7 @@ public class MainWindow {
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} // load in texture
+		}
 
 	}
 
@@ -329,42 +243,60 @@ public class MainWindow {
 		FloatBuffer CurrentMatrix = BufferUtils.createFloatBuffer(16);
 		glGetFloat(GL_MODELVIEW_MATRIX, CurrentMatrix);
 
-		// if(MouseOnepressed)
-		// {
-
 		MyArcball.getMatrix(CurrentMatrix);
-		// }
+
 
 		glLoadMatrix(CurrentMatrix);
 
 	}
 
-	/*
-	 * You can edit this method to add in your own objects / remember to load in
-	 * textures in the INIT method as they take time to load
-	 * 
-	 */
 	public void renderGL() {
 		changeOrth();
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		drawBackground();
 		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 		glColor3f(0.5f, 0.5f, 1.0f);
 
 		myDelta = getTime() - StartTime;
 		float delta = ((float) myDelta) / 10000;
 
+		// change CXK status
+		if (delta >= 0 && delta < 0.3) {
+			// 开始站立
+			stap = 1;
+		} else if (delta >= 0.3 && delta < 0.8) {
+			// 去拿球
+			stap = 2;
+		} else if (delta >= 0.8 && delta < 1.0) {
+			// 拿球站立
+			stap = 3;
+		} else if (delta >= 1.0 && delta < 1.2) {
+			// 走向篮筐
+			stap = 4;
+		} else if (delta >= 1.2 && delta < 1.5) {
+			// 发呆
+			stap = 5;
+		} else if (delta >= 1.5 && delta < 2.0) {
+			// 运球
+			stap = 6;
+		} else if (delta >= 2.0) {
+			// 投篮
+			stap = 7;
+		} else {
+			// 结束
+			stap = 8;
+		}
+
+
+		System.out.println(delta);
+
 		// code to aid in animation
 		float theta = (float) (delta * 2 * Math.PI);
 		float thetaDeg = delta * 360;
-		float posn_x = (float) Math.cos(theta); // same as your circle code in your notes
+		float posn_x = (float) Math.cos(theta);
 		float posn_y = (float) Math.sin(theta);
 
-		/*
-		 * This code draws a grid to help you view the human models movement You may
-		 * change this code to move the grid around and change its starting angle as you
-		 * please
-		 */
 		if (DRAWGRID) {
 			glPushMatrix();
 			Grid MyGrid = new Grid();
@@ -374,51 +306,113 @@ public class MainWindow {
 			glPopMatrix();
 		}
 
+		// draw CXK
 		glPushMatrix();
-		Human MyHuman = new Human();
-		glTranslatef(300, 400, 0);
-		glScalef(90f, 90f, 90f);
-
-		if (!BadAnimation) {
-			// insert your animation code to correct the postion for the human rotating
-
-		} else {
-
-			// bad animation version
-			glTranslatef(posn_x * 3.0f, 0.0f, posn_y * 3.0f);
+		CaiXukun myXukun = new CaiXukun();
+		if (stap == 1) {
+			glTranslatef(600, 200, 0);
+			glScalef(50f, 50f, 50f);
+		} else if (stap == 2) {
+			standCXK = false;
+			moveCXK = true;
+			glTranslatef((float) (600 - (delta-0.3) * 400), (float) (200 - (delta-0.3) * 100), 0);
+			glScalef(50f, 50f, 50f);
+			glRotatef(45, 0.0f, 1.0f, 0.0f);
+		} else if (stap == 3) {
+			standCXK = true;
+			moveCXK = false;
+			glTranslatef(400, 150, 0);
+			glScalef(50f,50f,50f);
+			glRotatef(85, 0.0f, 1.0f, 0.0f);
+		} else if (stap == 4) {
+			standCXK = false;
+			moveCXK = true;
+			glTranslatef((float) (400 + (delta-1) * 200), 150, 0);
+			glScalef(50f, 50f, 50f);
+			glRotatef(85, 0.0f, -1.0f, 0.0f);
+		} else if (stap == 5) {
+			moveCXK = false;
+			standCXK = true;
+			glTranslatef(440, 150, 0);
+			glScalef(50f, 50f, 50f);
+			glRotatef(80, 0.0f, -1.0f, 0.0f);
+		} else if (stap == 6) {
+			standCXK = false;
+			patCXK = true;
+			glTranslatef(440, 150, 0);
+			glScalef(50f, 50f, 50f);
+			glRotatef(80, 0.0f, -1.0f, 0.0f);
+		} else if (stap == 7) {
+			patCXK = false;
+			shootCXK = true;
+			glTranslatef(440, 150, 0);
+			glScalef(50f, 50f, 50f);
+			glRotatef(80, 0.0f, -1.0f, 0.0f);
 		}
-
-		MyHuman.drawHuman(delta, !BadAnimation); // give a delta for the Human object ot be animated
-
+		myXukun.drawXukun(delta, standCXK, moveCXK, patCXK, shootCXK);
 		glPopMatrix();
 
-		/*
-		 * This code puts the earth code in which is larger than the human so it appears
-		 * to change the scene
-		 */
-		if (Earth) {
-			// Globe in the centre of the scene
-			glPushMatrix();
-			TexSphere MyGlobe = new TexSphere();
-			// TexCube MyGlobe = new TexCube();
-			glTranslatef(500, 500, 500);
-			glScalef(140f, 140f, 140f);
+		// draw basketball cart
+		glPushMatrix();
+		{
+			Cart myCart = new Cart();
+			glTranslatef(300, 80, 0);
+			glScalef(50f, 50f, 50f);
+			glRotatef(70, 0.0f, -1.0f, 0.0f);
+			glRotatef(20, 0.0f, 0.0f, 1.0f);
 
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-
-			Color.white.bind();
-			texture.bind();
-			glEnable(GL_TEXTURE_2D);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-			glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-
-			MyGlobe.DrawTexSphere(8f, 100, 100, texture);
-			// MyGlobe.DrawTexCube();
-			glBindTexture(GL_TEXTURE_2D, 0);
-			glDisable(GL_TEXTURE_2D);
-			glPopMatrix();
+			myCart.drawCart(basketBall);
 		}
+		glPopMatrix();
 
+		// draw hoop
+		glPushMatrix();
+		{
+			Hoop myHoop = new Hoop();
+			glTranslatef(1100, 250, 0);
+			glScalef(80f, 80f, 80f);
+			glRotatef(150, 0.0f ,1.0f, 0.0f);
+			glRotatef(10, 1.0f, 0.0f, -1.0f);
+			myHoop.drawHoop();
+		}
+		glPopMatrix();
+
+		// draw cheerleader
+		glPushMatrix();
+		{
+			Cheerleader cheerleader1 = new Cheerleader();
+			glTranslatef(200, 200, 100);
+			glScalef(40f, 40f, 40f);
+			cheerleader1.drawLeader1(delta, true);
+
+		}
+		glPopMatrix();
+
+		// draw cheerleader
+		glPushMatrix();
+		{
+			Cheerleader cheerleader2 = new Cheerleader();
+			glTranslatef(100, 100, 100);
+			glScalef(40f, 40f, 40f);
+			cheerleader2.drawLeader2((float) (delta * 1.3), true);
+		}
+		glPopMatrix();
+	}
+
+	private void drawBackground() {
+		Color.white.bind();
+		schoolBackground.bind();
+
+		glBegin(GL_QUADS);
+		glTexCoord3f(0, 0, 0);
+		glVertex3f(1200, 800, 500);
+		glTexCoord3f(1, 0, 0);
+		glVertex3f(-700, 800, 500);
+		glTexCoord3f(1, 1, 0);
+		glVertex3f(-700, 0, 500);
+		glTexCoord3f(0, 1, 0);
+		glVertex3f(1200, 0, 500);
+		glEnd();
 	}
 
 	public static void main(String[] argv) {
@@ -426,15 +420,11 @@ public class MainWindow {
 		hello.start();
 	}
 
-	Texture texture;
-
-	/*
-	 * Any additional textures for your assignment should be written in here. Make a
-	 * new texture variable for each one so they can be loaded in at the beginning
-	 */
 	public void init() throws IOException {
-
-		texture = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("res/earthspace.png"));
+		schoolBackground = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("res/project1_Texture_2023.png"));
+		grass = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("res/grass.png"));
+		sky = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("res/sky.png"));
+		basketBall = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("res/basketball.png"));
 		System.out.println("Texture loaded okay ");
 	}
 }

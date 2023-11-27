@@ -1,12 +1,8 @@
 package objects3D;
 
 import static org.lwjgl.opengl.GL11.*;
-import org.newdawn.slick.Color;
-import org.newdawn.slick.opengl.Texture;
-import org.newdawn.slick.opengl.TextureLoader;
-import org.newdawn.slick.util.ResourceLoader;
 
-import GraphicsObjects.Utils;
+import org.newdawn.slick.opengl.Texture;
 
 public class TexSphere {
 	static float red[] = { 1.0f, 0.0f, 0.0f, 1.0f };
@@ -18,11 +14,7 @@ public class TexSphere {
 
 	}
 
-	// Implement using notes and examine Tetrahedron to aid in the coding look at
-	// lecture 7 , 7b and 8
-	// 7b should be your primary source, we will cover more about circles in later
-	// lectures to understand why the code works
-	public void DrawTexSphere(float radius, float nSlices, float nSegments, Texture myTexture) {
+	public void drawTexSphere(float radius, float nSlices, float nSegments, Texture myTexture) {
 		float x, y, z;
 		float s, t; // texture coordinates
 

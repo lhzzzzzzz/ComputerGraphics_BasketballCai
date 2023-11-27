@@ -12,10 +12,6 @@ public class Sphere {
 
 	}
 
-	// Implement using notes and examine Tetrahedron to aid in the coding look at
-	// lecture 7 , 7b and 8
-	// 7b should be your primary source, we will cover more about circles in later
-	// lectures to understand why the code works
 	public void drawSphere(float radius, float nSlices, float nSegments) {
 		// Calculate the angular increments for horizontal and vertical divisions
 		float angleH = (float) ((2.0f * Math.PI) / nSlices);
@@ -53,17 +49,18 @@ public class Sphere {
 				Vector4f normal = normal(new Point4f(x1, y1, z1, 0.0f), new Point4f(x2, y2, z2, 0.0f), new Point4f(x3, y3, z3, 0.0f));
 
 				// Draw the quad
+				GL11.glNormal3f(normal.x, normal.y, normal.z);
 				GL11.glVertex3f(x4, y4, z4);
-				GL11.glNormal3f(normal.x, normal.y, normal.z);
 
+				GL11.glNormal3f(normal.x, normal.y, normal.z);
 				GL11.glVertex3f(x1, y1, z1);
-				GL11.glNormal3f(normal.x, normal.y, normal.z);
 
+				GL11.glNormal3f(normal.x, normal.y, normal.z);
 				GL11.glVertex3f(x2, y2, z2);
-				GL11.glNormal3f(normal.x, normal.y, normal.z);
 
-				GL11.glVertex3f(x3, y3, z3);
 				GL11.glNormal3f(normal.x, normal.y, normal.z);
+				GL11.glVertex3f(x3, y3, z3);
+
 			}
 		}
 
