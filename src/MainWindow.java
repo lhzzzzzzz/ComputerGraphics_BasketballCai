@@ -2,19 +2,18 @@
 import java.io.IOException;
 import java.nio.FloatBuffer;
 
-import Model.CaiXukun;
-import Model.Cart;
-import Model.Cheerleader;
-import Model.Hoop;
+import Model.*;
 import objects3D.*;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.LWJGLException;
 import org.lwjgl.Sys;
 import org.lwjgl.input.Keyboard;
+import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import static org.lwjgl.opengl.GL11.*;
 
+import org.lwjgl.util.glu.GLU;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.opengl.Texture;
 import org.newdawn.slick.opengl.TextureLoader;
@@ -28,7 +27,6 @@ public class MainWindow {
 	private boolean BadAnimation = true;
 	private boolean isKeyAPress = false;
 	private boolean isKeyRPress = false;
-	private boolean isKeyEPress = false;
 	/** position of pointer */
 	float x = 400, y = 300;
 	/** angle of rotation */
@@ -54,13 +52,14 @@ public class MainWindow {
 	boolean patCXK = false;
 	boolean shootCXK = false;
 	int stap = 0;
-
+	int MouseX = 0;
+	int MouseY = 0;
+	private float cameraX = 0.0f;
+	private float cameraY = 0.0f;
 	float pullX = 0.0f; // arc ball X cord.
 	float pullY = 0.0f; // arc ball Y cord.
 
 	int OrthoNumber = 1200;
-	Texture grass;
-	Texture sky;
 	Texture schoolBackground;
 	Texture basketBall;
 
@@ -70,7 +69,6 @@ public class MainWindow {
 	public void start() {
 
 		StartTime = getTime();
-		System.out.println();
 		try {
 			Display.setDisplayMode(new DisplayMode(1200, 800));
 			Display.create();
@@ -85,7 +83,7 @@ public class MainWindow {
 
 		while (!Display.isCloseRequested()) {
 //			int delta = getDelta();
-//			update(delta);
+			update();
 			renderGL();
 			Display.update();
 			Display.sync(120); // cap fps to 120fps
@@ -94,71 +92,24 @@ public class MainWindow {
 		Display.destroy();
 	}
 
-	public void update(int delta) {
-
-		/** rest key is R */
-		if (Keyboard.isKeyDown(Keyboard.KEY_R)) {
-			if (!isKeyRPress) {
-				MyArcball.reset();
-				isKeyRPress = true;
-			}
-		} else {
-			isKeyRPress = false;
+	public void update() {
+		myDelta = getTime() - StartTime;
+		float delta = ((float) myDelta) / 10000;
+		if (delta>0.3 && delta<0.5) {
+			OrthoNumber -= 1;
+		} else if (delta > 2.3 && delta < 2.5) {
+			OrthoNumber += 1;
 		}
 
-
-		/* bad animation can be turn on or off using A key) */
-		if (Keyboard.isKeyDown(Keyboard.KEY_A)) {
-			if (!isKeyAPress) {
-				BadAnimation = !BadAnimation;
-				isKeyAPress = true;
-			}
-		} else {
-			isKeyAPress = false;
+		if (delta>0.3 && delta < 0.5) {
+			cameraX += 1;
+			cameraY += 0.5;
+		} else if (delta > 1.0 && delta < 1.2) {
+			cameraX -= 2;
+		} else if (delta > 2.3 && delta < 2.5) {
+			cameraX += 1;
+			cameraY -= 0.5;
 		}
-
-		if (Keyboard.isKeyDown(Keyboard.KEY_D))
-			x += 0.35f * delta;
-		if (Keyboard.isKeyDown(Keyboard.KEY_W))
-			y += 0.35f * delta;
-		if (Keyboard.isKeyDown(Keyboard.KEY_S))
-			y -= 0.35f * delta;
-		if (Keyboard.isKeyDown(Keyboard.KEY_Q))
-			rotation += 0.35f * delta;
-
-		
-		// show grid
-		if (waitForKeyrelease)
-		{
-			if (Keyboard.isKeyDown(Keyboard.KEY_G)) {
-
-				DRAWGRID = !DRAWGRID;
-				Keyboard.next();
-				if (Keyboard.isKeyDown(Keyboard.KEY_G)) {
-					waitForKeyrelease = true;
-				} else {
-					waitForKeyrelease = false;
-
-				}
-			}
-		}
-
-		if (Keyboard.isKeyDown(Keyboard.KEY_G) == false) {
-			waitForKeyrelease = true;
-		} else {
-			waitForKeyrelease = false;
-		}
-
-		// keep quad on the screen
-		if (x < 0)
-			x = 0;
-		if (x > 1200)
-			x = 1200;
-		if (y < 0)
-			y = 0;
-		if (y > 800)
-			y = 800;
-
 		updateFPS();
 	}
 
@@ -244,16 +195,15 @@ public class MainWindow {
 		glGetFloat(GL_MODELVIEW_MATRIX, CurrentMatrix);
 
 		MyArcball.getMatrix(CurrentMatrix);
-
-
 		glLoadMatrix(CurrentMatrix);
-
 	}
+
 
 	public void renderGL() {
 		changeOrth();
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glTranslatef(cameraX, cameraY, 0);
 		drawBackground();
 		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 		glColor3f(0.5f, 0.5f, 1.0f);
@@ -280,16 +230,16 @@ public class MainWindow {
 		} else if (delta >= 1.5 && delta < 2.0) {
 			// 运球
 			stap = 6;
-		} else if (delta >= 2.0) {
+		} else if (delta >= 2.0 && delta < 2.2) {
 			// 投篮
 			stap = 7;
-		} else {
-			// 结束
+		} else if (delta >= 2.2 && delta < 2.3){
+			// 等球进
 			stap = 8;
+		} else {
+			// 彻底结束
+			stap = 9;
 		}
-
-
-		System.out.println(delta);
 
 		// code to aid in animation
 		float theta = (float) (delta * 2 * Math.PI);
@@ -310,12 +260,13 @@ public class MainWindow {
 		glPushMatrix();
 		CaiXukun myXukun = new CaiXukun();
 		if (stap == 1) {
-			glTranslatef(600, 200, 0);
+			glTranslatef(600, 200, -200);
 			glScalef(50f, 50f, 50f);
+//			glRotatef(10, 0.0f, 1.0f, 0.0f);
 		} else if (stap == 2) {
 			standCXK = false;
 			moveCXK = true;
-			glTranslatef((float) (600 - (delta-0.3) * 400), (float) (200 - (delta-0.3) * 100), 0);
+			glTranslatef((float) (600 - (delta-0.3) * 400), (float) (200 - (delta-0.3) * 100), (float) (-200 + (delta-0.3) * 400));
 			glScalef(50f, 50f, 50f);
 			glRotatef(45, 0.0f, 1.0f, 0.0f);
 		} else if (stap == 3) {
@@ -325,14 +276,12 @@ public class MainWindow {
 			glScalef(50f,50f,50f);
 			glRotatef(85, 0.0f, 1.0f, 0.0f);
 		} else if (stap == 4) {
-			standCXK = false;
 			moveCXK = true;
 			glTranslatef((float) (400 + (delta-1) * 200), 150, 0);
 			glScalef(50f, 50f, 50f);
 			glRotatef(85, 0.0f, -1.0f, 0.0f);
 		} else if (stap == 5) {
 			moveCXK = false;
-			standCXK = true;
 			glTranslatef(440, 150, 0);
 			glScalef(50f, 50f, 50f);
 			glRotatef(80, 0.0f, -1.0f, 0.0f);
@@ -348,9 +297,69 @@ public class MainWindow {
 			glTranslatef(440, 150, 0);
 			glScalef(50f, 50f, 50f);
 			glRotatef(80, 0.0f, -1.0f, 0.0f);
+		} else if (stap == 8){
+			standCXK = true;
+			glTranslatef(440, 150, 0);
+			glScalef(50f, 50f, 50f);
+			glRotatef(80, 0.0f, -1.0f, 0.0f);
+		} else {
+			shootCXK = false;
+			glTranslatef(440, 150, 0);
+			glScalef(50f, 50f, 50f);
+//			glRotatef(10, 0.0f, -1.0f, 0.0f);
 		}
 		myXukun.drawXukun(delta, standCXK, moveCXK, patCXK, shootCXK);
 		glPopMatrix();
+
+
+//		draw basketball
+		glPushMatrix();
+		{
+			BasketBall basketBall1 = new BasketBall();
+			if (stap == 3) {
+				glTranslatef(350, 150, 0);
+				glScalef(40f, 40f, 40f);
+				basketBall1.drawBasketBall(delta, basketBall);
+			} else if (stap == 4) {
+				glTranslatef((450 + (delta-1) * 200), 150, 0);
+				glScalef(40f, 40f, 40f);
+				basketBall1.drawBasketBall(delta, basketBall);
+			} else if (stap == 5) {
+				glTranslatef(490, 150, 0);
+				glScalef(40f, 40f, 40f);
+				basketBall1.drawBasketBall(delta, basketBall);
+			} else if (stap == 6) {
+				float a = (float) (70 * Math.abs(Math.sin(10*Math.PI*delta)));
+				glTranslatef(490, 150 - a, 0);
+				glScalef(40f, 40f, 40f);
+				basketBall1.drawBasketBall(delta, basketBall);
+			} else if (stap == 7) {
+				if (delta < 2.1) {
+					float x = (float) (70 * Math.cos(5 * delta * Math.PI + (Math.PI / 6)));
+					float y = (float) (130 * Math.sin(5 * delta * Math.PI + (Math.PI / 6)));
+					glTranslatef(450 + x, 170 + y, 0);
+					glScalef(40f, 40f, 40f);
+					basketBall1.drawBasketBall(delta, basketBall);
+				} else {
+					float x = (float) (5350 * (delta - 2.1) + 415);
+					float y = (float) ((-0.00226 * x * x) + (3.2977 * x) - 698.417);
+					glTranslatef(x, y, 0);
+					glScalef(40f, 40f, 40f);
+					basketBall1.drawBasketBall(delta, basketBall);
+				}
+			} else if (stap == 8) {
+				float a = (float) (310 * Math.abs(Math.sin(10*Math.PI*(delta - 2.1) / 2)));
+				glTranslatef(950, 80 + a, 0);
+				glScalef(40f, 40f, 40f);
+				basketBall1.drawBasketBall(delta, basketBall);
+			} else if (stap == 9){
+				glTranslatef(950, 80, 0);
+				glScalef(40f, 40f, 40f);
+				basketBall1.drawBasketBall(delta, basketBall);
+			}
+		}
+		glPopMatrix();
+
 
 		// draw basketball cart
 		glPushMatrix();
@@ -360,7 +369,6 @@ public class MainWindow {
 			glScalef(50f, 50f, 50f);
 			glRotatef(70, 0.0f, -1.0f, 0.0f);
 			glRotatef(20, 0.0f, 0.0f, 1.0f);
-
 			myCart.drawCart(basketBall);
 		}
 		glPopMatrix();
@@ -369,7 +377,7 @@ public class MainWindow {
 		glPushMatrix();
 		{
 			Hoop myHoop = new Hoop();
-			glTranslatef(1100, 250, 0);
+			glTranslatef(1100, 250, 80);
 			glScalef(80f, 80f, 80f);
 			glRotatef(150, 0.0f ,1.0f, 0.0f);
 			glRotatef(10, 1.0f, 0.0f, -1.0f);
@@ -384,7 +392,6 @@ public class MainWindow {
 			glTranslatef(200, 200, 100);
 			glScalef(40f, 40f, 40f);
 			cheerleader1.drawLeader1(delta, true);
-
 		}
 		glPopMatrix();
 
@@ -405,13 +412,13 @@ public class MainWindow {
 
 		glBegin(GL_QUADS);
 		glTexCoord3f(0, 0, 0);
-		glVertex3f(1200, 800, 500);
+		glVertex3f(1250, 800, 500);
 		glTexCoord3f(1, 0, 0);
 		glVertex3f(-700, 800, 500);
 		glTexCoord3f(1, 1, 0);
 		glVertex3f(-700, 0, 500);
 		glTexCoord3f(0, 1, 0);
-		glVertex3f(1200, 0, 500);
+		glVertex3f(1250, 0, 500);
 		glEnd();
 	}
 
@@ -422,8 +429,6 @@ public class MainWindow {
 
 	public void init() throws IOException {
 		schoolBackground = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("res/project1_Texture_2023.png"));
-		grass = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("res/grass.png"));
-		sky = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("res/sky.png"));
 		basketBall = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("res/basketball.png"));
 		System.out.println("Texture loaded okay ");
 	}

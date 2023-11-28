@@ -3,40 +3,23 @@ package Model;
 import GraphicsObjects.Utils;
 import objects3D.Cylinder;
 import objects3D.SemiCircle;
+import objects3D.Shadow;
 import objects3D.Sphere;
 
 import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL11.glPopMatrix;
 
 public class Cheerleader {
 
     // basic colours
     static float black[] = { 0.0f, 0.0f, 0.0f, 1.0f };
     static float white[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-
-    static float grey[] = { 0.5f, 0.5f, 0.5f, 1.0f };
-    static float spot[] = { 0.1f, 0.1f, 0.1f, 0.5f };
-
-    // primary colours
+    static float shadowColor[] = {0.0f, 0.0f, 0.0f, 0.5f};
     static float red[] = { 1.0f, 0.0f, 0.0f, 1.0f };
-    static float green[] = { 0.0f, 1.0f, 0.0f, 1.0f };
-    static float blue[] = { 0.0f, 0.0f, 1.0f, 1.0f };
-
-    // secondary colours
     static float yellow[] = { 1.0f, 1.0f, 0.0f, 1.0f };
     static float magenta[] = { 1.0f, 0.0f, 1.0f, 1.0f };
-    static float cyan[] = { 0.0f, 1.0f, 1.0f, 1.0f };
-
-    // other colours
-    static float orange[] = { 1.0f, 0.5f, 0.0f, 1.0f, 1.0f };
-    static float brown[] = { 0.5f, 0.25f, 0.0f, 1.0f, 1.0f };
-    static float dkgreen[] = { 0.0f, 0.5f, 0.0f, 1.0f, 1.0f };
     static float pink[] = { 1.0f, 0.6f, 0.6f, 1.0f, 1.0f };
 
     static float skinColor[] = { 0.95686f, 0.8f, 0.6549f, 1.0f };
-    static float hairColor[] = { 0.40392f, 0.37255f, 0.43137f, 1.0f };
-    static float shirtColor[] = { 0.09804f, 0.09804f, 0.09804f, 1.0f };
-    static float pantsColor[] = { 0.54902f, 0.54902f, 0.54902f, 1.0f };
     public Cheerleader() {
 
     }
@@ -53,6 +36,8 @@ public class Cheerleader {
         Sphere sphere = new Sphere();
         Cylinder cylinder = new Cylinder();
         SemiCircle semiCircle = new SemiCircle();
+        Shadow shadow = new Shadow();
+
 
         glPushMatrix();
         {
@@ -342,6 +327,15 @@ public class Cheerleader {
                         glPopMatrix();
                     }
                     glPopMatrix();
+                    glPushMatrix();
+                    {
+                        // draw shadow
+                        glColor4f(shadowColor[0], shadowColor[1], shadowColor[2], shadowColor[3]);
+                        glTranslatef(0.0f, -2.9f, 0.0f);
+                        glRotatef(10, 1.0f, 0.0f, 0.0f);
+                        shadow.drawCircle(1.0f, 0, 32);
+                    }
+                    glPopMatrix();
                 }
                 glPopMatrix();
             }
@@ -362,6 +356,7 @@ public class Cheerleader {
         Sphere sphere = new Sphere();
         Cylinder cylinder = new Cylinder();
         SemiCircle semiCircle = new SemiCircle();
+        Shadow shadow = new Shadow();
 
         glPushMatrix();
         {
@@ -649,6 +644,15 @@ public class Cheerleader {
                             glPopMatrix();
                         }
                         glPopMatrix();
+                    }
+                    glPopMatrix();
+                    glPushMatrix();
+                    {
+                        // draw shadow
+                        glColor4f(shadowColor[0], shadowColor[1], shadowColor[2], shadowColor[3]);
+                        glTranslatef(0.0f, -2.9f, 0.0f);
+                        glRotatef(10, 1.0f, 0.0f, 0.0f);
+                        shadow.drawCircle(1.0f, 0, 32);
                     }
                     glPopMatrix();
                 }

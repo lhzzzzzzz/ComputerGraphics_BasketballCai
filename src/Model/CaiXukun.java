@@ -4,6 +4,7 @@ import static org.lwjgl.opengl.GL11.*;
 import GraphicsObjects.Utils;
 import objects3D.Cylinder;
 import objects3D.SemiCircle;
+import objects3D.Shadow;
 import objects3D.Sphere;
 
 
@@ -15,6 +16,8 @@ public class CaiXukun {
 	static float hairColor[] = { 0.40392f, 0.37255f, 0.43137f, 1.0f };
 	static float shirtColor[] = { 0.09804f, 0.09804f, 0.09804f, 1.0f };
 	static float pantsColor[] = { 0.54902f, 0.54902f, 0.54902f, 1.0f };
+	static float shadowColor[] = {0.0f, 0.0f, 0.0f, 0.5f};
+
 
 
 	public CaiXukun() {
@@ -24,24 +27,38 @@ public class CaiXukun {
 	public void drawXukun(float delta, boolean stand, boolean move, boolean pat, boolean shoot) {
 		float theta = (float) (delta * 2 * Math.PI) * 10;
 		float armRotation;
+		float highLegRotation;
 		float legRotation;
-		if (stand) {
+		if (stand && move) {
 			armRotation = 0;
+			highLegRotation = (float) Math.cos(theta) * 45;
+			legRotation = (float) Math.cos(theta) * 30;
+		} else if (stand && shoot) {
+			armRotation = 95;
+			highLegRotation = 0;
+			legRotation = 0;
+		} else if (stand) {
+			armRotation = 0;
+			highLegRotation = 0;
 			legRotation = 0;
 		} else if (move) {
-			armRotation = (float) Math.cos(theta) * 45;
-			legRotation = (float) Math.cos(theta) * 30;
+			armRotation = (float) Math.cos(theta / 1.5) * 45;
+			highLegRotation = (float) Math.cos(theta / 1.5) * 45;
+			legRotation = (float) Math.cos(theta / 1.5) * 30;
 		} else if (pat) {
-			armRotation = (float) Math.cos(theta + 3 * Math.PI) * 45 + 45;
+			armRotation = (float) Math.cos(theta) * 15;
+			highLegRotation = 0;
 			legRotation = 0;
 		} else {
-			armRotation = (float) Math.cos(theta) * 45 + 130;
+			armRotation = (float) Math.cos((theta / 2) - Math.PI) * 45 + 130;
+			highLegRotation = 0;
 			legRotation = 0;
 		}
 
 		Sphere sphere = new Sphere();
 		Cylinder cylinder = new Cylinder();
 		SemiCircle semiCircle = new SemiCircle();
+		Shadow shadow = new Shadow();
 
 		glDisable(GL_TEXTURE_2D);
 		glPushMatrix();
@@ -148,6 +165,9 @@ public class CaiXukun {
 								glPushMatrix();
 								{
 									glTranslatef(0.0f, 0.0f, 0.0f);
+									if (shoot) {
+										glRotatef(30, -1.0f, 0.0f, 0.0f);
+									}
 									glRotatef(70.0f, 1.0f, 0.0f, 0.0f);
 									cylinder.drawCylinder(0.1f, 0.7f, 32);
 
@@ -204,6 +224,9 @@ public class CaiXukun {
 								glPushMatrix();
 								{
 									glTranslatef(0.0f, 0.0f, 0.0f);
+									if (shoot) {
+										glRotatef(30, -1.0f, 0.0f, 0.0f);
+									}
 									glRotatef(70.0f, 1.0f, 0.0f, 0.0f);
 									cylinder.drawCylinder(0.1f, 0.7f, 32);
 
@@ -273,7 +296,7 @@ public class CaiXukun {
 								glTranslatef(0.0f, 0.0f, 0.0f);
 								glRotatef(0.0f, 0.0f, 0.0f, 0.0f);
 								if (move) {
-									glRotatef((-armRotation / 2) + 90, 1.0f, 0.0f, 0.0f);
+									glRotatef((-highLegRotation / 2) + 90, 1.0f, 0.0f, 0.0f);
 								} else {
 									glRotatef(90, 1.0f, 0.0f, 0.0f);
 								}
@@ -294,7 +317,7 @@ public class CaiXukun {
 									glPushMatrix();
 									{
 										glTranslatef(0.0f, 0.0f, 0.0f);
-										if (move && armRotation < 0) {
+										if (move && highLegRotation < 0) {
 											glRotatef(legRotation, 1.0f, 0.0f, 0.0f);
 										}
 										cylinder.drawCylinder(0.12f, 0.7f, 32);
@@ -334,7 +357,7 @@ public class CaiXukun {
 								glTranslatef(0.0f, 0.0f, 0.0f);
 								glRotatef(0.0f, 0.0f, 0.0f, 0.0f);
 								if (move) {
-									glRotatef((armRotation / 2) + 90, 1.0f, 0.0f, 0.0f);
+									glRotatef((highLegRotation / 2) + 90, 1.0f, 0.0f, 0.0f);
 								} else {
 									glRotatef(90, 1.0f, 0.0f, 0.0f);
 								}
@@ -355,7 +378,7 @@ public class CaiXukun {
 									glPushMatrix();
 									{
 										glTranslatef(0.0f, 0.0f, 0.0f);
-										if (move && armRotation > 0) {
+										if (move && highLegRotation > 0) {
 											glRotatef(-legRotation, 1.0f, 0.0f, 0.0f);
 										}
 										cylinder.drawCylinder(0.12f, 0.7f, 32);
@@ -378,6 +401,17 @@ public class CaiXukun {
 							glPopMatrix();
 						}
 						glPopMatrix();
+					}
+					glPopMatrix();
+					glPushMatrix();
+					{
+						// draw shadow
+//						System.out.println("success" + delta);
+						glColor4f(shadowColor[0], shadowColor[1], shadowColor[2], shadowColor[3]);
+						glTranslatef(0.0f, -3.0f, 0.0f);
+						glRotatef(20, 0.0f, 0.0f, 1.0f);
+						glRotatef(10, 1.0f, 0.0f, 0.0f);
+						shadow.drawCircle(1f, 0, 32);
 					}
 					glPopMatrix();
 				}

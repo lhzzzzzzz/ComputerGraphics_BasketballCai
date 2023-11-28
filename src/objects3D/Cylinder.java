@@ -4,6 +4,7 @@ import static org.lwjgl.opengl.GL11.*;
 import GraphicsObjects.Point4f;
 import GraphicsObjects.Vector4f;
 import org.lwjgl.opengl.GL11;
+import org.newdawn.slick.opengl.Texture;
 
 import java.math.*;
 
