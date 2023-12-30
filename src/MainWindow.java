@@ -8,12 +8,10 @@ import org.lwjgl.BufferUtils;
 import org.lwjgl.LWJGLException;
 import org.lwjgl.Sys;
 import org.lwjgl.input.Keyboard;
-import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import static org.lwjgl.opengl.GL11.*;
 
-import org.lwjgl.util.glu.GLU;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.opengl.Texture;
 import org.newdawn.slick.opengl.TextureLoader;
@@ -26,7 +24,12 @@ public class MainWindow {
 	private boolean dragMode = false;
 	private boolean BadAnimation = true;
 	private boolean isKeyAPress = false;
-	private boolean isKeyRPress = false;
+	private boolean isKeyQPress = false;
+	private boolean isKeySPress = false;
+	private boolean isSpacePress = false;
+	private boolean isKeyDPress = false;
+	private boolean isKeyEPress = false;
+	private boolean isKeyFPress = false;
 	/** position of pointer */
 	float x = 400, y = 300;
 	/** angle of rotation */
@@ -40,25 +43,27 @@ public class MainWindow {
 	long myDelta = 0; // to use for animation
 	float Alpha = 0; // to use for animation
 	long StartTime;
-
+	float spacePressStartTime = 0;
+	float stapStartTime = 0;
+	boolean moveF = false;
+	boolean moveB = false;
 	Arcball MyArcball = new Arcball();
 
 	boolean DRAWGRID = false;
 	boolean waitForKeyrelease = true;
+
+	boolean startGame = true;
 
 	// action of model
 	boolean standCXK = true;
 	boolean moveCXK = false;
 	boolean patCXK = false;
 	boolean shootCXK = false;
-	int stap = 0;
-	int MouseX = 0;
-	int MouseY = 0;
+	int stap = 1;
 	private float cameraX = 0.0f;
 	private float cameraY = 0.0f;
 	float pullX = 0.0f; // arc ball X cord.
 	float pullY = 0.0f; // arc ball Y cord.
-
 	int OrthoNumber = 1200;
 	Texture schoolBackground;
 	Texture basketBall;
@@ -95,18 +100,109 @@ public class MainWindow {
 	public void update() {
 		myDelta = getTime() - StartTime;
 		float delta = ((float) myDelta) / 10000;
-		if (delta>0.3 && delta<0.5) {
+		// 控制视角
+		if (stap == 2 && delta - stapStartTime <= 0.2) {
 			OrthoNumber -= 1;
-		} else if (delta > 2.3 && delta < 2.5) {
+		} else if (stap == 12 && delta - stapStartTime <= 0.2) {
 			OrthoNumber += 1;
 		}
 
-		if (delta>0.3 && delta < 0.5) {
+		// 检测A键状态, 向篮球车走
+		if (Keyboard.isKeyDown(Keyboard.KEY_A)) {
+			if (!isKeyAPress) {
+				isKeyAPress = true;
+				if (stap == 1) {
+					stap = 2;
+					stapStartTime = delta;
+				}
+			}
+		} else {
+			isKeyAPress = false;
+		}
+
+
+		// 检测S键状态, 向右走
+		if (Keyboard.isKeyDown(Keyboard.KEY_S)) {
+			if (!isKeySPress) {
+				isKeySPress = true;
+				if (stap == 3){
+					stap = 4;
+					stapStartTime = delta;
+				}
+			}
+		} else {
+			isKeySPress = false;
+		}
+
+		// 检测空格键状态，投篮
+		if (Keyboard.isKeyDown(Keyboard.KEY_SPACE)) {
+			if (!isSpacePress) {
+				isSpacePress = true;
+				spacePressStartTime = delta; // 记录按下时的时间
+			}
+		} else {
+			if (isSpacePress) {
+				isSpacePress = false;
+				float spacePressDuration = delta - spacePressStartTime; // 计算按键时长
+				if (stap == 5) { // 确保当前是投篮阶段
+					if (spacePressDuration >= 0.1 && spacePressDuration <= 0.2) {
+						stap = 7; // 投篮成功
+						System.out.println("yes");
+					} else {
+						stap = 8; // 投篮失败
+						System.out.println("no");
+					}
+				}
+			}
+		}
+
+		// 检测D键状态, 往回坐
+		if (Keyboard.isKeyDown(Keyboard.KEY_D)) {
+			if (!isKeyDPress) {
+				isKeyDPress = true;
+				if (stap == 11) {
+					stap = 13;
+					stapStartTime = delta;
+				}
+			}
+		} else {
+			isKeyDPress = false;
+		}
+
+		// 检测E键状态, 运球
+		if (Keyboard.isKeyDown(Keyboard.KEY_E)) {
+			if (!isKeyEPress) {
+				isKeyEPress = true;
+				if (stap == 5) {
+					stap = 6;
+					stapStartTime = delta;
+				}
+			}
+		} else {
+			isKeyEPress = false;
+		}
+
+		// 检测F键状态，结束
+		if (Keyboard.isKeyDown(Keyboard.KEY_F)) {
+			if (!isKeyFPress) {
+				isKeyFPress = true;
+				if (stap == 11) {
+					stap = 12;
+					stapStartTime = delta;
+				}
+			}
+		} else {
+			isKeyFPress = false;
+		}
+
+		if (stap == 2 && delta - stapStartTime <= 0.2) {
 			cameraX += 1;
 			cameraY += 0.5;
-		} else if (delta > 1.0 && delta < 1.2) {
+		} else if (stap == 4) {
 			cameraX -= 2;
-		} else if (delta > 2.3 && delta < 2.5) {
+		} else if (stap == 13) {
+			cameraX += 2;
+		} else if (stap == 12 && delta - stapStartTime <= 0.2) {
 			cameraX += 1;
 			cameraY -= 0.5;
 		}
@@ -210,36 +306,10 @@ public class MainWindow {
 
 		myDelta = getTime() - StartTime;
 		float delta = ((float) myDelta) / 10000;
+		float timeInCurrentStap = delta - stapStartTime;
 
 		// change CXK status
-		if (delta >= 0 && delta < 0.3) {
-			// 开始站立
-			stap = 1;
-		} else if (delta >= 0.3 && delta < 0.8) {
-			// 去拿球
-			stap = 2;
-		} else if (delta >= 0.8 && delta < 1.0) {
-			// 拿球站立
-			stap = 3;
-		} else if (delta >= 1.0 && delta < 1.2) {
-			// 走向篮筐
-			stap = 4;
-		} else if (delta >= 1.2 && delta < 1.5) {
-			// 发呆
-			stap = 5;
-		} else if (delta >= 1.5 && delta < 2.0) {
-			// 运球
-			stap = 6;
-		} else if (delta >= 2.0 && delta < 2.2) {
-			// 投篮
-			stap = 7;
-		} else if (delta >= 2.2 && delta < 2.3){
-			// 等球进
-			stap = 8;
-		} else {
-			// 彻底结束
-			stap = 9;
-		}
+
 
 		// code to aid in animation
 		float theta = (float) (delta * 2 * Math.PI);
@@ -260,55 +330,132 @@ public class MainWindow {
 		glPushMatrix();
 		CaiXukun myXukun = new CaiXukun();
 		if (stap == 1) {
+			// 一开始站立
 			glTranslatef(600, 200, -200);
 			glScalef(50f, 50f, 50f);
-//			glRotatef(10, 0.0f, 1.0f, 0.0f);
+			stapStartTime = delta;
 		} else if (stap == 2) {
+			// 往篮球车那里走
 			standCXK = false;
 			moveCXK = true;
-			glTranslatef((float) (600 - (delta-0.3) * 400), (float) (200 - (delta-0.3) * 100), (float) (-200 + (delta-0.3) * 400));
+			glTranslatef((float) (600 - (timeInCurrentStap) * 400), (float) (200 - (timeInCurrentStap) * 100), (float) (-200 + (timeInCurrentStap) * 400));
 			glScalef(50f, 50f, 50f);
 			glRotatef(45, 0.0f, 1.0f, 0.0f);
+			if (timeInCurrentStap >= 0.5) {
+				stap = 3;
+				stapStartTime = delta;
+			}
 		} else if (stap == 3) {
+			// 在篮球车那里站着
 			standCXK = true;
 			moveCXK = false;
 			glTranslatef(400, 150, 0);
 			glScalef(50f,50f,50f);
 			glRotatef(85, 0.0f, 1.0f, 0.0f);
+			stapStartTime = delta;
 		} else if (stap == 4) {
+			// 往右走
 			moveCXK = true;
-			glTranslatef((float) (400 + (delta-1) * 200), 150, 0);
+			glTranslatef((float) (400 + (timeInCurrentStap) * 200), 150, 0);
 			glScalef(50f, 50f, 50f);
 			glRotatef(85, 0.0f, -1.0f, 0.0f);
+			if (timeInCurrentStap >= 0.2) {
+				stap = 5;
+				stapStartTime = delta;
+			}
 		} else if (stap == 5) {
+			// 等待投篮
 			moveCXK = false;
+			standCXK = true;
 			glTranslatef(440, 150, 0);
 			glScalef(50f, 50f, 50f);
 			glRotatef(80, 0.0f, -1.0f, 0.0f);
+			stapStartTime = delta;
 		} else if (stap == 6) {
+			// 运球
 			standCXK = false;
 			patCXK = true;
 			glTranslatef(440, 150, 0);
 			glScalef(50f, 50f, 50f);
 			glRotatef(80, 0.0f, -1.0f, 0.0f);
+			if (timeInCurrentStap >= 0.1) {
+				stap = 5;
+				patCXK = false;
+				standCXK = true;
+				stapStartTime = delta;
+			}
 		} else if (stap == 7) {
+			// 投进的投篮动作
 			patCXK = false;
 			shootCXK = true;
+			standCXK = false;
 			glTranslatef(440, 150, 0);
 			glScalef(50f, 50f, 50f);
 			glRotatef(80, 0.0f, -1.0f, 0.0f);
-		} else if (stap == 8){
+			if (timeInCurrentStap >= 0.2) {
+				stap = 9;
+				stapStartTime = delta;
+			}
+		} else if (stap == 8) {
+			// 没投进的投篮动作，无区别
+			patCXK = false;
+			shootCXK = true;
+			standCXK = false;
+			glTranslatef(440, 150, 0);
+			glScalef(50f, 50f, 50f);
+			glRotatef(80, 0.0f, -1.0f, 0.0f);
+			System.out.println(timeInCurrentStap);
+			if (timeInCurrentStap >= 0.2) {
+				stap = 10;
+				stapStartTime = delta;
+			}
+		} else if (stap == 9){
+			// 投进等待
 			standCXK = true;
 			glTranslatef(440, 150, 0);
 			glScalef(50f, 50f, 50f);
 			glRotatef(80, 0.0f, -1.0f, 0.0f);
-		} else {
+			if (timeInCurrentStap >= 0.1) {
+				stap = 11;
+				stapStartTime = delta;
+			}
+		} else if (stap == 10){
+			// 没投进等待，也无区别
+			standCXK = true;
+			glTranslatef(440, 150, 0);
+			glScalef(50f, 50f, 50f);
+			glRotatef(80, 0.0f, -1.0f, 0.0f);
+			if (timeInCurrentStap >= 0.1) {
+				stap = 11;
+				stapStartTime = delta;
+			}
+		} else if (stap == 11) {
+			// 投完球等待
+			shootCXK = false;
+			moveCXK = false;
+			standCXK = true;
+			patCXK = false;
+			glTranslatef(440, 150, 0);
+			glScalef(50f, 50f, 50f);
+			glRotatef(80, 0.0f, -1.0f, 0.0f);
+		} else if (stap == 12){
+			// 彻底结束
 			shootCXK = false;
 			glTranslatef(440, 150, 0);
 			glScalef(50f, 50f, 50f);
-//			glRotatef(10, 0.0f, -1.0f, 0.0f);
+		} else if (stap == 13) {
+			// 往左走拿球
+			moveCXK = true;
+			standCXK = false;
+			glTranslatef((float) (440 - (timeInCurrentStap) * 200), 150, 0);
+			glScalef(50f, 50f, 50f);
+			glRotatef(-85, 0.0f, -1.0f, 0.0f);
+			if (timeInCurrentStap >= 0.2) {
+				stap = 3;
+				stapStartTime = delta;
+			}
 		}
-		myXukun.drawXukun(delta, standCXK, moveCXK, patCXK, shootCXK);
+		myXukun.drawXukun(timeInCurrentStap, standCXK, moveCXK, patCXK, shootCXK);
 		glPopMatrix();
 
 
@@ -321,7 +468,7 @@ public class MainWindow {
 				glScalef(40f, 40f, 40f);
 				basketBall1.drawBasketBall(delta, basketBall);
 			} else if (stap == 4) {
-				glTranslatef((450 + (delta-1) * 200), 150, 0);
+				glTranslatef((450 + (timeInCurrentStap) * 200), 150, 0);
 				glScalef(40f, 40f, 40f);
 				basketBall1.drawBasketBall(delta, basketBall);
 			} else if (stap == 5) {
@@ -329,30 +476,53 @@ public class MainWindow {
 				glScalef(40f, 40f, 40f);
 				basketBall1.drawBasketBall(delta, basketBall);
 			} else if (stap == 6) {
-				float a = (float) (70 * Math.abs(Math.sin(10*Math.PI*delta)));
+				float a = (float) (70 * Math.abs(Math.sin(10*Math.PI*timeInCurrentStap)));
 				glTranslatef(490, 150 - a, 0);
 				glScalef(40f, 40f, 40f);
 				basketBall1.drawBasketBall(delta, basketBall);
 			} else if (stap == 7) {
-				if (delta < 2.1) {
-					float x = (float) (70 * Math.cos(5 * delta * Math.PI + (Math.PI / 6)));
-					float y = (float) (130 * Math.sin(5 * delta * Math.PI + (Math.PI / 6)));
+				// 投进了的曲线
+				if (timeInCurrentStap <= 0.1) {
+					float x = (float) (70 * Math.cos(5 * timeInCurrentStap * Math.PI + (Math.PI / 6)));
+					float y = (float) (130 * Math.sin(5 * timeInCurrentStap * Math.PI + (Math.PI / 6)));
 					glTranslatef(450 + x, 170 + y, 0);
 					glScalef(40f, 40f, 40f);
-					basketBall1.drawBasketBall(delta, basketBall);
+					basketBall1.drawBasketBall(timeInCurrentStap, basketBall);
 				} else {
-					float x = (float) (5350 * (delta - 2.1) + 415);
+					float x = (float) (5350 * (timeInCurrentStap - 0.1) + 415);
 					float y = (float) ((-0.00226 * x * x) + (3.2977 * x) - 698.417);
 					glTranslatef(x, y, 0);
 					glScalef(40f, 40f, 40f);
 					basketBall1.drawBasketBall(delta, basketBall);
 				}
-			} else if (stap == 8) {
-				float a = (float) (310 * Math.abs(Math.sin(10*Math.PI*(delta - 2.1) / 2)));
+			} else if (stap == 9) {
+				// 投进了的自由落体
+				float a = (float) (310 * Math.abs(Math.sin(10*Math.PI*(timeInCurrentStap + 0.1) / 2)));
 				glTranslatef(950, 80 + a, 0);
 				glScalef(40f, 40f, 40f);
 				basketBall1.drawBasketBall(delta, basketBall);
-			} else if (stap == 9){
+			} else if (stap == 8) {
+				// 没投进的曲线
+				if (timeInCurrentStap <= 0.1) {
+					float x = (float) (70 * Math.cos(5 * timeInCurrentStap * Math.PI + (Math.PI / 6)));
+					float y = (float) (130 * Math.sin(5 * timeInCurrentStap * Math.PI + (Math.PI / 6)));
+					glTranslatef(450 + x, 170 + y, 0);
+					glScalef(40f, 40f, 40f);
+					basketBall1.drawBasketBall(delta, basketBall);
+				} else {
+					float x = (float) (4350 * (timeInCurrentStap - 0.1) + 415);
+					float y = (float) ((-0.00339 * x * x) + (4.54144 * x) - 1020.826);
+					glTranslatef(x, y, 0);
+					glScalef(40f, 40f, 40f);
+					basketBall1.drawBasketBall(delta, basketBall);
+				}
+			} else if (stap == 10) {
+				// 没投进的下落曲线
+				float a = (float) (310 * Math.abs(Math.sin(10*Math.PI*(timeInCurrentStap + 0.1) / 2)));
+				glTranslatef((float) (850 + 100 * (timeInCurrentStap / 0.1)), 80 + a, 0);
+				glScalef(40f, 40f, 40f);
+				basketBall1.drawBasketBall(delta, basketBall);
+			} else if (stap == 11){
 				glTranslatef(950, 80, 0);
 				glScalef(40f, 40f, 40f);
 				basketBall1.drawBasketBall(delta, basketBall);
