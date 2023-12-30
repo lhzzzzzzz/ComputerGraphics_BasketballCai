@@ -21,39 +21,24 @@ import GraphicsObjects.Arcball;
 import GraphicsObjects.Utils;
 
 public class MainWindow {
-	private boolean dragMode = false;
-	private boolean BadAnimation = true;
 	private boolean isKeyAPress = false;
-	private boolean isKeyQPress = false;
 	private boolean isKeySPress = false;
 	private boolean isSpacePress = false;
 	private boolean isKeyDPress = false;
 	private boolean isKeyEPress = false;
 	private boolean isKeyFPress = false;
 	/** position of pointer */
-	float x = 400, y = 300;
-	/** angle of rotation */
-	float rotation = 0;
-	/** time at last frame */
 	long lastFrame;
 	/** frames per second */
 	int fps;
 	/** last fps time */
 	long lastFPS;
 	long myDelta = 0; // to use for animation
-	float Alpha = 0; // to use for animation
 	long StartTime;
 	float spacePressStartTime = 0;
 	float stapStartTime = 0;
-	boolean moveF = false;
-	boolean moveB = false;
 	Arcball MyArcball = new Arcball();
-
 	boolean DRAWGRID = false;
-	boolean waitForKeyrelease = true;
-
-	boolean startGame = true;
-
 	// action of model
 	boolean standCXK = true;
 	boolean moveCXK = false;
@@ -62,17 +47,16 @@ public class MainWindow {
 	int stap = 1;
 	private float cameraX = 0.0f;
 	private float cameraY = 0.0f;
-	float pullX = 0.0f; // arc ball X cord.
-	float pullY = 0.0f; // arc ball Y cord.
 	int OrthoNumber = 1200;
 	Texture schoolBackground;
 	Texture basketBall;
+	int totalShoot;
+	int successShoot;
 
-	static float grey[] = { 0.5f, 0.5f, 0.5f, 0.9f };
-	static float spot[] = { 0.1f, 0.1f, 0.1f, 0.5f };
+	static float[] grey = { 0.5f, 0.5f, 0.5f, 0.9f };
+	static float[] spot = { 0.1f, 0.1f, 0.1f, 0.5f };
 
 	public void start() {
-
 		StartTime = getTime();
 		try {
 			Display.setDisplayMode(new DisplayMode(1200, 800));
@@ -145,7 +129,9 @@ public class MainWindow {
 				isSpacePress = false;
 				float spacePressDuration = delta - spacePressStartTime; // 计算按键时长
 				if (stap == 5) { // 确保当前是投篮阶段
+					totalShoot++;
 					if (spacePressDuration >= 0.1 && spacePressDuration <= 0.2) {
+						successShoot++;
 						stap = 7; // 投篮成功
 						System.out.println("yes");
 					} else {
@@ -197,14 +183,14 @@ public class MainWindow {
 
 		if (stap == 2 && delta - stapStartTime <= 0.2) {
 			cameraX += 1;
-			cameraY += 0.5;
+            cameraY = (float) (cameraY + 0.5);
 		} else if (stap == 4) {
 			cameraX -= 2;
 		} else if (stap == 13) {
 			cameraX += 2;
 		} else if (stap == 12 && delta - stapStartTime <= 0.2) {
 			cameraX += 1;
-			cameraY -= 0.5;
+            cameraY = (float) (cameraY - 0.5);
 		}
 		updateFPS();
 	}
@@ -223,7 +209,7 @@ public class MainWindow {
 
 	public void updateFPS() {
 		if (getTime() - lastFPS > 1000) {
-			Display.setTitle("FPS: " + fps);
+			Display.setTitle("FPS: " + fps + "  hit rate: " + successShoot + " / " + totalShoot);
 			fps = 0;
 			lastFPS += 1000;
 		}
@@ -308,14 +294,6 @@ public class MainWindow {
 		float delta = ((float) myDelta) / 10000;
 		float timeInCurrentStap = delta - stapStartTime;
 
-		// change CXK status
-
-
-		// code to aid in animation
-		float theta = (float) (delta * 2 * Math.PI);
-		float thetaDeg = delta * 360;
-		float posn_x = (float) Math.cos(theta);
-		float posn_y = (float) Math.sin(theta);
 
 		if (DRAWGRID) {
 			glPushMatrix();
@@ -404,7 +382,6 @@ public class MainWindow {
 			glTranslatef(440, 150, 0);
 			glScalef(50f, 50f, 50f);
 			glRotatef(80, 0.0f, -1.0f, 0.0f);
-			System.out.println(timeInCurrentStap);
 			if (timeInCurrentStap >= 0.2) {
 				stap = 10;
 				stapStartTime = delta;
@@ -592,6 +569,7 @@ public class MainWindow {
 		glEnd();
 	}
 
+	@SuppressWarnings("squid:S106")
 	public static void main(String[] argv) {
 		MainWindow hello = new MainWindow();
 		hello.start();
